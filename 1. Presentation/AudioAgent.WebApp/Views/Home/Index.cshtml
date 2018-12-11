@@ -1,0 +1,210 @@
+﻿@model AudioAgent.WebApp.Models.GeoSearchModel
+
+@{
+    ViewBag.Title = RGlobal.GeoLocalization;
+}
+
+
+@section css{
+    <style>
+        /*.container {
+         padding: 20px;
+         }*/
+
+        .tooltip.has-error .tooltip-arrow {
+            left: 10px !important;
+            border-bottom-color: #a94442;
+        }
+
+        .tooltip.has-error .tooltip-inner {
+            background: #a94442;
+            max-width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 35px;
+        }
+
+        /* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        #description {
+            font-family: Roboto;
+            font-size: 15px;
+            font-weight: 300;
+        }
+
+
+        .form-control {
+            min-width: 0;
+            width: 600px !important;
+            font-size: 14px !important;
+            color: #4d90fe;
+        }
+
+        .join-form {
+            padding: 14px 20px;
+            margin: 12px 0px;
+            font-size: 16px;
+            letter-spacing: 0px;
+            font-weight: 300;
+            height: auto;
+        }
+
+        .eg {
+            padding: .1em;
+            background-color: #f3f0f0;
+            border: 1px solid #CCC;
+            max-width: 655px;
+        }
+    </style>
+
+}
+
+@section Scripts{
+    @Scripts.Render("~/bundles/angular")
+    <script src=@Url.Content("~/Scripts/jquery.maskedinput.js")></script>
+    <script src=@Url.Content("~/js/app/app.validation.js")></script>
+    <script src=@Url.Content("~/js/controllers/GeoLocalizationComponent.js")></script>
+    <script src=@Url.Content("~/js/googleapi/GoogleAPIScript.js")></script>
+    <script src=@Url.Content("~/js/googleapi/GeoInitialize.js")></script>
+
+    <script>
+
+            var geoOffiLoc = '@UrlHelperExtensions.GetGeoLocationPosition()';
+
+            if (isEmpty(lang)) {
+                document.write('<script src=' + appPathAppName + '/Scripts/i18n/angular-locale_en-us.js><\/script>');
+            } else {
+                document.write('<script src=' +
+                    appPathAppName +
+                    '/Scripts/i18n/angular-locale_' +
+                    lang.toLowerCase() +
+                    '.js><\/script>');
+            }
+    </script>
+}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">@RGlobal.ImageUrlLocalization</h1>
+                <ol class="breadcrumb">
+                    <li>@Html.ActionLink(RGlobal.LoginPage, "Login", "Account")</li>
+                    <li class="active">@RGlobal.RedirectToLogin</li>
+                </ol>
+            </div>
+            <div class="col-sm-8">
+                <h3>@RGlobal.ImageUrlLocalizationShort</h3>
+
+                <div ng-app="geoLocApp">
+                    <form>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.LocalName, new { @class = "control-label" })
+                                    @Html.TextBoxFor(m => m.LocalName, new { type = "text", @class = "form-control", placeholder = RHome.LocalToInsert, name = "LocalName", required = "required", pattern_notification = RValidation.LocalName, data_bind = "value: imageUrl" })@*, ng_model = "LocalName"*@
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <input type="hidden" value="contact" name="save">
+                                <button class="btn btn-primary" id="InsertLocalSearched" data-bind="Click:$root.doAction">@RGlobal.InsertSearch</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+            <div class="col-sm-4">
+                @*<h3>@Html.Raw(ROffice.CompanyNameMore)</h3>*@
+                <h4>@Html.Raw(RGlobal.ProjectWServicesSubheading)</h4>
+                <p>
+                    @ROffice.AddressRoad<br>
+                    @ROffice.AddressStateAndCode<br>
+                </p>
+                <p><i class="fa fa-phone"></i> <abbr title="Phone">@RGlobal.Phone</abbr>: @ROffice.PhoneNumber</p>
+                <p><i class="fa fa-envelope-o"></i> <abbr title="Email">E</abbr>: <a href="mailto:feedback@wservices.co.uk">@ROffice.EmailAddress</a></p>
+
+                <p><i class="fa fa-clock-o"></i> <abbr title="Hours">H</abbr>: @ROffice.HoursWork</p>
+                <ul class="list-unstyled list-inline list-social-icons">
+                    <li class="tooltip-social facebook-link"><a title="Facebook" data-placement="top" data-toggle="tooltip" href="#facebook-page"><i class="fa fa-facebook-square fa-2x"></i></a></li>
+                    <li class="tooltip-social linkedin-link"><a title="LinkedIn" data-placement="top" data-toggle="tooltip" href="#linkedin-company-page"><i class="fa fa-linkedin-square fa-2x"></i></a></li>
+                    <li class="tooltip-social twitter-link"><a title="Twitter" data-placement="top" data-toggle="tooltip" href="#twitter-profile"><i class="fa fa-twitter-square fa-2x"></i></a></li>
+                    <li class="tooltip-social google-plus-link"><a title="Google+" data-placement="top" data-toggle="tooltip" href="#google-plus-page"><i class="fa fa-google-plus-square fa-2x"></i></a></li>
+                </ul>
+            </div>
+
+
+        </div><!-- /.row -->
+        <body onload="initialize()">
+
+        </body>
+        <a href="#"  class='eg' data-bind="click: toggleVisibility">Toggle Grid</a>
+        <div class="breadcrumb" data-bind="visible: showRow">
+            <div class="row" data-bind="visible: showRow">
+                <div class="col-lg-12">
+                    <table class="table" data-bind="visible: showRow">
+                        <thead>
+                            <tr>
+                                <th>Company Image Id</th>
+                                <th>Company Type</th>
+                                <th>Image Url</th>
+                                <th>Image Size (MB)</th>
+                                <th>Image Extension</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: companyImagesUrlList">
+                            <tr>
+                                <td data-bind="text: CompanyImageID"></td>
+                                <td data-bind="text: CompanyType"></td>
+                                <td data-bind="text: ImageUrl"></td>
+                                <td data-bind="text: ImageSizeMB"></td>
+                                <td data-bind="text: ImageExtension"></td>
+                                <!-- <td data-bind="text: '£{sales} MM'"></td> -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- /.row -->
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>@RGlobal.ImageUrlAlreadyLocated</h3>
+
+            </div>
+            <div class="col-lg-12">
+                <!-- Embedded and Google Maps (key) -->
+                <input id="autocomplete" class="form-control join-form" type="text" placeholder=@RHome.SearchBox>
+                <div id="mapSearch" style="height: 400px;"></div>
+            </div>
+        </div><!-- /.row -->
+    </div>
+        <br />
+
+        <!-- Knockout VM -->
+        <script type='text/javascript' src='~/js/knockout.js'></script>
+        <script type='text/javascript' src='~/ViewModels/getDataVM.js'></script>
+
+        @Scripts.Render("~/bundles/jqueryval")
+        @if (GlobalHelper.DefaultCulture != GlobalHelper.CurrentCulture)
+        {
+            <script src="@Url.GetScript("jquery.validate.extension.js")" defer></script>
+        }
+
+        <script>
+            GeoLocalizationLoadFunctions();
+        </script>
+
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBX5ko0X7d8baaQBV2QIHhHclBeY_1rC6k&libraries=places" async defer></script>
